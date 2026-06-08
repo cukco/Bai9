@@ -1,29 +1,13 @@
-select name, sum(price*quantity) as total_sales from product
-inner join orderdetail on product.id = orderdetail.product_id
-group by name;
+create or replace procedure calculate_total_sales(
+    start_date DATE,
+    end_date DATE,
+    OUT total NUMERIC
+) language plpgsql
+as $$
+    begin
+        select sum(amount) into total from sales
+        where sale_date between start_date and end_date
+    end;
+$$;
 
-select category, avg(price*quantity) from product
-inner join orderdetail on product.id = orderdetail.product_id
-group by category;
-
-select category, avg(price*quantity) from product
-inner join orderdetail on product.id = orderdetail.product_id
-group by category
-having avg(price*quantity) > 20000000;
-
-
-select name from product
-inner join orderdetail on product.id = orderdetail.product_id
-group by name
-having sum(price*quantity) >(
-    select avg(total_sales) from (
-        select sum(price*quantity) as total_sales from product
-        inner join orderdetail on product.id = orderdetail.product_id
-        group by name
-));
-
-select name,quantity from product
-left join orderdetail on product.id = orderdetail.product_id;
-
-
-
+CALL calculate_total_orders('2023-01-01', '2023-12-31', NULL);
